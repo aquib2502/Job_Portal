@@ -84,6 +84,9 @@ const Info: React.FC<AccontProps> = ({ user, isYourAccount }) => {
     }
   };
 
+const resumeViewUrl = user.resume || "";
+
+
   const router = useRouter();
 
   return (
@@ -205,13 +208,15 @@ const Info: React.FC<AccontProps> = ({ user, isYourAccount }) => {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium">Resume Document</p>
-                  <Link
-                    href={user.resume}
-                    className="text-sm text-blue-500 hover:underline"
-                    target="_blank"
-                  >
-                    View Resume PDF
-                  </Link>
+                 <Link
+  href={resumeViewUrl}
+  className="text-sm text-blue-500 hover:underline"
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  View Resume PDF
+</Link>
+
                 </div>
                 {/* edit button */}
 

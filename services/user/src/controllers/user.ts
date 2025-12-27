@@ -79,6 +79,7 @@ export const updateProfilePic = TryCatch(
       {
         buffer: fileBuffer.content,
         public_id: user.profile_pic_public_id,
+        mimeType: file.mimetype, // ← ADD THIS
       }
     );
 
@@ -110,6 +111,7 @@ export const updateResume = TryCatch(async (req: AuthenticatedRequest, res) => {
     {
       buffer: fileBuffer.content,
       public_id: user.resume_public_id,
+      mimeType: file.mimetype, // ← ADD THIS
     }
   );
 
@@ -142,8 +144,7 @@ export const addSkillToUser = TryCatch(
       const users =
         await sql`SELECT user_id FROM users WHERE user_id = ${userId}`;
 
-      if (users.length === 0)
-        throw new ErrorHandler(404, "User not found.");
+      if (users.length === 0) throw new ErrorHandler(404, "User not found.");
 
       const [skill] = await sql`
         INSERT INTO skills (name)
@@ -203,8 +204,7 @@ export const deleteSkillFromUser = TryCatch(
 export const applyForJob = TryCatch(async (req: AuthenticatedRequest, res) => {
   const user = req.user;
   if (!user) throw new ErrorHandler(401, "Authentication required");
-  if (user.role !== "jobseeker")
-    throw new ErrorHandler(403, "Forbidden");
+  if (user.role !== "jobseeker") throw new ErrorHandler(403, "Forbidden");
 
   if (!user.resume)
     throw new ErrorHandler(
@@ -222,9 +222,7 @@ export const applyForJob = TryCatch(async (req: AuthenticatedRequest, res) => {
   if (!job) throw new ErrorHandler(404, "No jobs with this id");
   if (!job.is_active) throw new ErrorHandler(400, "Job is not active");
 
-  const subTime = user.subscription
-    ? new Date(user.subscription).getTime()
-    : 0;
+  const subTime = user.subscription ? new Date(user.subscription).getTime() : 0;
 
   const isSubscribed = subTime > Date.now();
 
@@ -235,7 +233,10 @@ export const applyForJob = TryCatch(async (req: AuthenticatedRequest, res) => {
     RETURNING *
   `;
 
-  res.json({ message: "Applied for job successfully", application: newApplication });
+  res.json({
+    message: "Applied for job successfully",
+    application: newApplication,
+  });
 });
 
 export const getAllaplications = TryCatch(

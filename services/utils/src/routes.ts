@@ -5,24 +5,32 @@ const router = express.Router();
 
 router.post("/upload", async (req, res) => {
   try {
-    const { buffer, public_id } = req.body;
+    const { buffer, public_id, mimeType } = req.body;
 
-    if (public_id) {
-      await cloudinary.v2.uploader.destroy(public_id);
+    if (!buffer) {
+      return res.status(400).json({ message: "File buffer is required" });
     }
 
-    const cloud = await cloudinary.v2.uploader.upload(buffer);
+    const isPdf = mimeType === "application/pdf";
+
+    const cloud = await cloudinary.v2.uploader.upload(buffer, {
+      resource_type: "image",            // PDFs uploaded as image
+      public_id,                         // DO NOT append .pdf
+      format: isPdf ? "pdf" : undefined, // Cloudinary adds .pdf
+      overwrite: true,
+      access_mode: "public",             // 🔑 allow public delivery
+      type: "upload",                    // ensure public upload type
+    });
 
     res.json({
       url: cloud.secure_url,
       public_id: cloud.public_id,
     });
   } catch (error: any) {
-    res.status(500).json({
-      message: error.message,
-    });
+    res.status(500).json({ message: error.message });
   }
 });
+
 
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
